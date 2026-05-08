@@ -23,12 +23,38 @@ def index():
     return send_from_directory('.', 'index.html')
 
 @app.route('/assets/<path:filename>')
+@app.route('/assets/characters/<path:filename>')
 def serve_assets(filename):
-    return send_from_directory('assets', filename)
+    # Search order: 
+    # 1. assets/characters/filename
+    # 2. assets/filename
+    # 3. root/filename (for flattened GitHub uploads)
+    
+    just_filename = os.path.basename(filename)
+    
+    paths_to_check = [
+        os.path.join('assets', 'characters', just_filename),
+        os.path.join('assets', just_filename),
+        just_filename
+    ]
+    
+    for p in paths_to_check:
+        if os.path.exists(p):
+            return send_from_directory(os.path.dirname(p) or '.', os.path.basename(p))
+            
+    return "File not found", 404
 
 @app.route('/<path:path>')
 def serve_root_files(path):
-    return send_from_directory('.', path)
+    if os.path.exists(path):
+        return send_from_directory('.', path)
+    
+    # Fallback for sounds or images requested without 'assets/' prefix
+    just_filename = os.path.basename(path)
+    if os.path.exists(just_filename):
+        return send_from_directory('.', just_filename)
+        
+    return send_from_directory('.', 'index.html')
 
 @app.route('/api/signup', methods=['POST'])
 def signup():
