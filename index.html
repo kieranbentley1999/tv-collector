@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TV Character Collector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="auth-overlay" class="auth-overlay">
+        <div class="auth-modal">
+            <h1 class="auth-title">TV COLLECTOR</h1>
+            <p class="auth-subtitle">Secure your legendary collection</p>
+            
+            <div class="auth-tabs">
+                <button id="tab-login" class="auth-tab active">Login</button>
+                <button id="tab-signup" class="auth-tab">Sign Up</button>
+            </div>
+
+            <form id="auth-form">
+                <div class="input-group">
+                    <input type="text" id="auth-user" placeholder="Username" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="auth-pass" placeholder="Password" required>
+                </div>
+                <button type="submit" id="auth-submit" class="auth-btn">Enter the Vault</button>
+            </form>
+            <div id="auth-error" class="auth-error hidden"></div>
+        </div>
+    </div>
+    <header class="app-header">
+        <div class="logo">
+            <h1>TV <span>COLLECTOR</span></h1>
+        </div>
+        <nav class="main-nav">
+            <button id="nav-store" class="nav-btn active">Binge</button>
+            <button id="nav-collection" class="nav-btn">Collection</button>
+            <button id="nav-catalog" class="nav-btn">Catalog</button>
+        </nav>
+            <div class="nav-right">
+                <button id="logout-btn" class="nav-btn logout-btn hidden">Logout</button>
+                <button id="sound-test" class="sound-btn" title="Test Sound">🔊</button>
+                <div class="coin-display">
+                    <img src="assets/coin.png" alt="coin" class="coin-icon">
+                    <span id="coin-amount">5,000</span>
+                </div>
+            </div>
+    </header>
+
+    <main id="app-container">
+        <!-- STORE VIEW -->
+        <section id="view-store" class="view active">
+            <div class="store-header">
+                <h2>Featured Packs</h2>
+                <p>Open packs to collect legendary TV characters.</p>
+            </div>
+            <div class="pack-grid">
+                <div class="pack-card premium">
+                    <div class="pack-image-container">
+                        <img src="assets/tv_pack.png?v=2" alt="Premium Series Pack" class="pack-image">
+                        <div class="pack-glow"></div>
+                    </div>
+                    <div class="pack-info">
+                        <h3>Premium Series Pack</h3>
+                        <p>Contains 3 character cards. Guaranteed 1 Rare or higher.</p>
+                        <button id="buy-pack-btn" class="buy-btn">
+                            <span>Open Pack</span>
+                            <span class="price">💰 500</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- COLLECTION VIEW -->
+        <section id="view-collection" class="view hidden">
+            <div class="collection-header">
+                <h2>My Collection</h2>
+                <div class="collection-stats">
+                    <span class="stat-label">UNIQUE:</span> <span id="collection-count">0</span> 
+                    <span class="stat-divider">|</span>
+                    <span class="stat-label">TOTAL:</span> <span id="total-cards-count">0</span>
+                </div>
+            </div>
+            <div class="filters">
+                <select id="rarity-filter">
+                    <option value="all">All Rarities</option>
+                    <option value="Common">Common</option>
+                    <option value="Uncommon">Uncommon</option>
+                    <option value="Rare">Rare</option>
+                    <option value="Super Rare">Super Rare</option>
+                </select>
+                <select id="series-filter">
+                    <option value="all">All Series</option>
+                </select>
+            </div>
+            <div id="collection-grid" class="card-grid">
+                <!-- Cards will be injected here -->
+            </div>
+        </section>
+
+        <!-- Catalog View -->
+        <section id="view-catalog" class="view hidden">
+            <div class="collection-header">
+                <h2>Character Catalog</h2>
+                <p>Browse all <span id="catalog-total-count">0</span> available cards to collect!</p>
+            </div>
+            <div class="filters">
+                <select id="catalog-rarity-filter">
+                    <option value="all">All Rarities</option>
+                    <option value="Common">Common</option>
+                    <option value="Uncommon">Uncommon</option>
+                    <option value="Rare">Rare</option>
+                    <option value="Super Rare">Super Rare</option>
+                </select>
+                <select id="catalog-series-filter">
+                    <option value="all">All Series</option>
+                </select>
+            </div>
+            <div id="catalog-grid" class="card-grid">
+                <!-- All possible cards injected here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- PACK OPENING MODAL -->
+    <div id="pack-modal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content pack-opening-sequence">
+            
+            <!-- Phase 1: The Pack -->
+            <div id="pack-reveal-phase" class="phase active">
+                <div class="pack-interactive">
+                    <img src="assets/tv_pack.png?v=2" alt="Opening Pack" class="opening-pack-img">
+                    <div class="click-to-open-text">Click to Open</div>
+                </div>
+            </div>
+
+            <!-- Phase 2: Card Reveal -->
+            <div id="card-reveal-phase" class="phase hidden">
+                <div id="pulled-cards-container" class="pulled-cards">
+                    <!-- Cards injected here -->
+                </div>
+                <button id="finish-opening-btn" class="action-btn hidden">Done</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- NOTIFICATION SYSTEM -->
+    <div id="notification-container"></div>
+
+    <script src="database_tv.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
