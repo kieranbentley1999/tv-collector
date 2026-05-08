@@ -50,6 +50,16 @@ body {
     letter-spacing: 1px;
 }
 
+.stat-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 8px;
+    filter: drop-shadow(0 0 5px var(--gold));
+}
+
 .logo span {
     color: var(--gold);
 }
