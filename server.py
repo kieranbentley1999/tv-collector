@@ -35,7 +35,11 @@ def static_proxy(path):
     if os.path.exists(filename) and not os.path.isdir(filename):
         return send_from_directory('.', filename)
     
-    # Return index.html for any unknown routes (SPA style)
+    # If it looks like a file (has an extension) but wasn't found, return 404
+    if '.' in path:
+        return "File not found", 404
+        
+    # Otherwise, return index.html for SPA-style routing
     return send_from_directory('.', 'index.html')
 
 @app.route('/api/signup', methods=['POST'])
