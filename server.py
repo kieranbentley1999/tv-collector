@@ -3,7 +3,7 @@ from flask_cors import CORS
 import json
 import os
 
-app = Flask(__name__, static_folder='.')
+app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
 DB_FILE = 'users.json'
@@ -22,8 +22,12 @@ def save_db(db):
 def index():
     return send_from_directory('.', 'index.html')
 
+@app.route('/assets/<path:filename>')
+def serve_assets(filename):
+    return send_from_directory('assets', filename)
+
 @app.route('/<path:path>')
-def static_proxy(path):
+def serve_root_files(path):
     return send_from_directory('.', path)
 
 @app.route('/api/signup', methods=['POST'])
