@@ -6,15 +6,7 @@
     <title>TV Character Collector</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <style>
-        .stat-icon {
-            width: 24px !important;
-            height: 24px !important;
-            object-fit: contain !important;
-            vertical-align: middle !important;
-            margin-right: 8px !important;
-        }
-    </style>
+
 </head>
 <body>
     <div id="auth-overlay" class="auth-overlay">
@@ -51,8 +43,8 @@
             <div class="nav-right">
                 <button id="logout-btn" class="nav-btn logout-btn hidden">Logout</button>
                 <button id="sound-test" class="sound-btn" title="Test Sound">🔊</button>
-                <div class="coin-display">
-                    <img src="assets/coin.png" alt="coin" class="coin-icon">
+                <div class="coin-balance">
+                    <img src="assets/coin.png" alt="coin" class="stat-icon">
                     <span id="coin-amount">5,000</span>
                 </div>
             </div>

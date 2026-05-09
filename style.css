@@ -53,6 +53,8 @@ body {
 .stat-icon {
     width: 24px;
     height: 24px;
+    min-width: 24px;
+    min-height: 24px;
     object-fit: contain;
     display: inline-block;
     vertical-align: middle;
@@ -131,6 +133,13 @@ body {
     gap: 0.5rem;
     font-weight: 700;
     color: var(--gold-light);
+    white-space: nowrap;
+}
+
+.coin-balance img {
+    width: 24px !important;
+    height: 24px !important;
+    object-fit: contain;
 }
 
 /* Main Container */
