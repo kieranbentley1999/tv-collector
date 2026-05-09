@@ -5,6 +5,10 @@ let userCoins = 0;
 let userInventory = []; 
 const PACK_COST = 500;
 const CARDS_PER_PACK = 3;
+const REWARD_AMOUNT = 1000;
+const REWARD_INTERVAL = 60 * 60 * 1000; // 1 hour in ms
+let lastClaimTime = 0;
+let rewardTimerInterval = null;
 
 // Drop Rates
 const DROP_RATES = {
@@ -55,6 +59,9 @@ const elCatalogGrid = document.getElementById('catalog-grid');
 const elCatalogCount = document.getElementById('catalog-total-count');
 const elCatalogFilter = document.getElementById('catalog-rarity-filter');
 const elCatalogSeriesFilter = document.getElementById('catalog-series-filter');
+
+const elRewardTimer = document.getElementById('reward-timer');
+const elClaimBtn = document.getElementById('claim-reward-btn');
 
 const elMobileNavStore = document.getElementById('mobile-nav-store');
 const elMobileNavCollection = document.getElementById('mobile-nav-collection');
@@ -120,6 +127,7 @@ function init() {
     elBuyPackBtn.addEventListener('click', buyPack);
     elPackInteractive.addEventListener('click', openPack);
     elFinishBtn.addEventListener('click', closePackModal);
+    elClaimBtn.addEventListener('click', claimReward);
     
     elRarityFilter.addEventListener('change', renderCollection);
     elSeriesFilter.addEventListener('change', renderCollection);
@@ -145,9 +153,11 @@ async function autoLogin(username) {
             currentUser = data.username;
             userInventory = data.inventory || [];
             userCoins = data.coins || 5000;
+            lastClaimTime = data.last_claim || 0;
             elAuthOverlay.classList.add('hidden');
             elLogoutBtn.classList.remove('hidden');
             updateCoinsDisplay();
+            startRewardTimer();
             renderCollection();
             renderCatalog();
             showNotification('Reconnected to the Vault!', 'success');
@@ -444,18 +454,20 @@ async function handleAuth(e) {
         });
         const data = await response.json();
         if (data.success) {
-            if (authMode === 'signup') {
-                showNotification('Account Created! Now logging in...', 'success');
-                authMode = 'login';
-                elTabLogin.click();
-                return;
-            }
             currentUser = data.username;
             userInventory = data.inventory || [];
             userCoins = data.coins || 5000;
+            lastClaimTime = data.last_claim || 0;
             
             localStorage.setItem('vault_user', currentUser);
             elLogoutBtn.classList.remove('hidden');
+
+            if (authMode === 'signup') {
+                showNotification('Account Created! Welcome to the Vault!', 'success');
+                // No need to click login tab, just proceed
+            } else {
+                showNotification('Welcome back to the Vault!', 'success');
+            }
 
             // MIGRATION: Check for old local cards and move them to account
             const localInv = JSON.parse(localStorage.getItem('tv_inventory') || localStorage.getItem('tv_collection') || '[]');
@@ -478,8 +490,8 @@ async function handleAuth(e) {
             }
 
             elAuthOverlay.classList.add('hidden');
-            showNotification('Welcome back to the Vault!', 'success');
             updateCoinsDisplay();
+            startRewardTimer();
             renderCollection();
             renderCatalog();
         } else {
@@ -498,9 +510,57 @@ async function syncData() {
         await fetch(API_URL + '/save', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: currentUser, inventory: userInventory, coins: userCoins })
+            body: JSON.stringify({ 
+                username: currentUser, 
+                inventory: userInventory, 
+                coins: userCoins,
+                last_claim: lastClaimTime
+            })
         });
     } catch (err) { console.error('Failed to sync data with server'); }
+}
+
+function startRewardTimer() {
+    if (rewardTimerInterval) clearInterval(rewardTimerInterval);
+    updateRewardUI();
+    rewardTimerInterval = setInterval(updateRewardUI, 1000);
+}
+
+function updateRewardUI() {
+    if (!currentUser) return;
+    
+    const now = Date.now();
+    const nextClaim = lastClaimTime + REWARD_INTERVAL;
+    const diff = nextClaim - now;
+    
+    if (diff <= 0) {
+        elRewardTimer.classList.add('hidden');
+        elClaimBtn.classList.remove('hidden');
+    } else {
+        elRewardTimer.classList.remove('hidden');
+        elClaimBtn.classList.add('hidden');
+        
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        elRewardTimer.textContent = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+}
+
+function claimReward() {
+    if (!currentUser) return;
+    
+    const now = Date.now();
+    if (now >= lastClaimTime + REWARD_INTERVAL) {
+        userCoins += REWARD_AMOUNT;
+        lastClaimTime = now;
+        updateCoinsDisplay();
+        syncData();
+        startRewardTimer();
+        showNotification(`💰 Claimed ${REWARD_AMOUNT.toLocaleString()} coins!`, 'success');
+        sfx.legendary.play();
+    }
 }
 
 function handleLogout() {

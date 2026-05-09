@@ -55,7 +55,8 @@ def signup():
     db[username] = {
         "password": password,
         "inventory": [],
-        "coins": 5000
+        "coins": 5000,
+        "last_claim": 0
     }
     save_db(db)
     return jsonify({"success": True, "message": "Account created!"})
@@ -74,7 +75,8 @@ def login():
             "success": True, 
             "username": username,
             "inventory": user['inventory'],
-            "coins": user['coins']
+            "coins": user['coins'],
+            "last_claim": user.get('last_claim', 0)
         })
     
     return jsonify({"success": False, "message": "Invalid credentials"}), 401
@@ -92,7 +94,8 @@ def login_auto():
             "success": True, 
             "username": username,
             "inventory": user['inventory'],
-            "coins": user['coins']
+            "coins": user['coins'],
+            "last_claim": user.get('last_claim', 0)
         })
     
     return jsonify({"success": False, "message": "Session expired"}), 401
@@ -108,6 +111,7 @@ def save_data():
     if username in db:
         db[username]['inventory'] = inventory
         db[username]['coins'] = coins
+        db[username]['last_claim'] = data.get('last_claim', db[username].get('last_claim', 0))
         save_db(db)
         return jsonify({"success": True})
     
