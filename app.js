@@ -36,10 +36,12 @@ Object.values(sfx).forEach(audio => {
 const elCoins = document.getElementById('coin-amount');
 const elNavStore = document.getElementById('nav-store');
 const elNavCollection = document.getElementById('nav-collection');
+const elNavSets = document.getElementById('nav-sets');
 const elNavCatalog = document.getElementById('nav-catalog');
 const elViewStore = document.getElementById('view-store');
 const elViewCollection = document.getElementById('view-collection');
 const elViewCatalog = document.getElementById('view-catalog');
+const elViewSets = document.getElementById('view-sets');
 const elBuyPackBtn = document.getElementById('buy-pack-btn');
 
 const elPackModal = document.getElementById('pack-modal');
@@ -59,12 +61,14 @@ const elCatalogGrid = document.getElementById('catalog-grid');
 const elCatalogCount = document.getElementById('catalog-total-count');
 const elCatalogFilter = document.getElementById('catalog-rarity-filter');
 const elCatalogSeriesFilter = document.getElementById('catalog-series-filter');
+const elSetsGrid = document.getElementById('sets-grid');
 
 const elRewardTimer = document.getElementById('reward-timer');
 const elClaimBtn = document.getElementById('claim-reward-btn');
 
 const elMobileNavStore = document.getElementById('mobile-nav-store');
 const elMobileNavCollection = document.getElementById('mobile-nav-collection');
+const elMobileNavSets = document.getElementById('mobile-nav-sets');
 const elMobileNavCatalog = document.getElementById('mobile-nav-catalog');
 
 const elNavAdmin = document.getElementById('nav-admin');
@@ -119,10 +123,12 @@ function init() {
 
     elNavStore.addEventListener('click', () => switchView('store'));
     elNavCollection.addEventListener('click', () => switchView('collection'));
+    elNavSets.addEventListener('click', () => switchView('sets'));
     elNavCatalog.addEventListener('click', () => switchView('catalog'));
 
     elMobileNavStore.addEventListener('click', () => switchView('store'));
     elMobileNavCollection.addEventListener('click', () => switchView('collection'));
+    elMobileNavSets.addEventListener('click', () => switchView('sets'));
     elMobileNavCatalog.addEventListener('click', () => switchView('catalog'));
 
     elNavAdmin.addEventListener('click', () => switchView('admin'));
@@ -186,16 +192,19 @@ function switchView(view) {
     elViewStore.classList.remove('active');
     elViewCollection.classList.remove('active');
     elViewCatalog.classList.remove('active');
+    elViewSets.classList.remove('active');
     elViewAdmin.classList.remove('active');
     
     elNavStore.classList.remove('active');
     elNavCollection.classList.remove('active');
     elNavCatalog.classList.remove('active');
+    elNavSets.classList.remove('active');
     elNavAdmin.classList.remove('active');
 
     elMobileNavStore.classList.remove('active');
     elMobileNavCollection.classList.remove('active');
     elMobileNavCatalog.classList.remove('active');
+    elMobileNavSets.classList.remove('active');
     elMobileNavAdmin.classList.remove('active');
     
     if (view === 'store') {
@@ -215,6 +224,12 @@ function switchView(view) {
         elNavCatalog.classList.add('active');
         elMobileNavCatalog.classList.add('active');
         renderCatalog();
+    } else if (view === 'sets') {
+        elViewSets.classList.add('active');
+        elViewSets.classList.remove('hidden');
+        elNavSets.classList.add('active');
+        elMobileNavSets.classList.add('active');
+        renderSets();
     } else if (view === 'admin') {
         elViewAdmin.classList.add('active');
         elViewAdmin.classList.remove('hidden');
@@ -263,7 +278,9 @@ function pullCards(numCards) {
         }
 
         const rarity = forcedRarity || determineRarity();
-        const randomPlayer = PLAYERS[Math.floor(Math.random() * PLAYERS.length)];
+        // EXCLUDE MYTHICS FROM PACKS
+        const availablePlayers = PLAYERS.filter(p => p.rarity !== 'Mythic');
+        const randomPlayer = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
         const pulledCard = { ...randomPlayer, rarity: rarity };
         pulled.push(pulledCard);
         
@@ -352,6 +369,7 @@ function generateCardElement(player, faceDown = false) {
         <div class="card-face card-back"></div>
         <div class="card-face card-front" data-rarity="${p.rarity}">
             ${p.rarity === 'Super Rare' ? '<div class="legendary-shine"></div>' : ''}
+            ${p.rarity === 'Mythic' ? '<div class="mythic-shine"></div>' : ''}
             ${p.img ? `<img src="${p.img}" class="player-photo" onerror="this.style.opacity='0'">` : ''}
             <div class="card-overlay">
                 <div class="card-show">${p.show}</div>
@@ -373,7 +391,7 @@ function renderCollection() {
         inventoryCounts[key] = (inventoryCounts[key] || 0) + 1;
     });
 
-    const RARITIES = ['Super Rare', 'Rare', 'Uncommon', 'Common'];
+    const RARITIES = ['Mythic', 'Super Rare', 'Rare', 'Uncommon', 'Common'];
     const processedKeys = new Set();
     let uniqueCount = 0;
     
@@ -393,6 +411,7 @@ function renderCollection() {
             wrapper.innerHTML = `
                 <div class="card-face card-front" data-rarity="${p.rarity}" style="transform: none;">
                     ${p.rarity === 'Super Rare' ? '<div class="legendary-shine"></div>' : ''}
+                    ${p.rarity === 'Mythic' ? '<div class="mythic-shine"></div>' : ''}
                     ${count > 1 ? `<div class="duplicate-badge">x${count}</div>` : ''}
                     ${p.img ? `<img src="${p.img}" class="player-photo" onerror="this.style.opacity='0'">` : ''}
                     <div class="card-overlay">
@@ -413,7 +432,7 @@ function renderCatalog() {
     elCatalogGrid.innerHTML = '';
     const filterRarity = elCatalogFilter.value;
     const filterSeries = elCatalogSeriesFilter.value;
-    const RARITIES = ['Super Rare', 'Rare', 'Uncommon', 'Common'];
+    const RARITIES = ['Mythic', 'Super Rare', 'Rare', 'Uncommon', 'Common'];
     let totalPossible = 0;
     
     RARITIES.forEach(rarity => {
@@ -427,6 +446,7 @@ function renderCatalog() {
             wrapper.innerHTML = `
                 <div class="card-face card-front" data-rarity="${p.rarity}" style="transform: none;">
                     ${p.rarity === 'Super Rare' ? '<div class="legendary-shine"></div>' : ''}
+                    ${p.rarity === 'Mythic' ? '<div class="mythic-shine"></div>' : ''}
                     ${p.img ? `<img src="${p.img}" class="player-photo" onerror="this.style.opacity='0'">` : ''}
                     <div class="card-overlay">
                         <div class="card-show">${p.show}</div>
@@ -439,6 +459,65 @@ function renderCatalog() {
         });
     });
     elCatalogCount.textContent = totalPossible;
+}
+
+function renderSets() {
+    elSetsGrid.innerHTML = '';
+    const shows = [...new Set(PLAYERS.map(p => p.show))];
+    
+    // Get unique owned card IDs (rarity doesn't matter for sets, just having the character)
+    const ownedIds = new Set(userInventory.map(key => parseInt(key.split('-')[0])));
+
+    shows.forEach(show => {
+        const showCards = PLAYERS.filter(p => p.show === show && p.rarity !== 'Mythic');
+        const mythicCard = PLAYERS.find(p => p.show === show && p.rarity === 'Mythic');
+        
+        if (showCards.length === 0) return; // Skip shows with no base cards
+
+        const ownedCount = showCards.filter(p => ownedIds.has(p.id)).length;
+        const percent = Math.floor((ownedCount / showCards.length) * 100);
+        const isComplete = ownedCount === showCards.length;
+        const alreadyHasMythic = mythicCard ? userInventory.includes(`${mythicCard.id}-Mythic`) : true;
+
+        const setCard = document.createElement('div');
+        setCard.className = `set-card ${isComplete ? 'complete' : ''}`;
+        setCard.innerHTML = `
+            <div class="set-info">
+                <h3>${show}</h3>
+                <div class="set-progress-container">
+                    <div class="set-progress-bar" style="width: ${percent}%"></div>
+                </div>
+                <div class="set-stats">${ownedCount} / ${showCards.length} Cards Collected</div>
+            </div>
+            ${(isComplete && mythicCard && !alreadyHasMythic) ? 
+                `<button class="claim-mythic-btn" onclick="claimMythic('${show}')">Claim Mythic Reward!</button>` : 
+                (alreadyHasMythic && mythicCard && isComplete ? `<div class="mythic-unlocked">💎 Mythic Unlocked</div>` : ``)
+            }
+        `;
+        elSetsGrid.appendChild(setCard);
+    });
+}
+
+async function claimMythic(showName) {
+    const mythicCard = PLAYERS.find(p => p.show === showName && p.rarity === 'Mythic');
+    if (!mythicCard) return;
+
+    const invKey = `${mythicCard.id}-Mythic`;
+    if (userInventory.includes(invKey)) return;
+
+    userInventory.push(invKey);
+    syncData();
+    renderSets();
+    
+    // Epic Animation Effect
+    showNotification(`💎 MYTHIC UNLOCKED: ${mythicCard.name}! 💎`, 'success');
+    sfx.legendary.play();
+    
+    // Optional: Show the card in a modal for impact
+    startPackOpeningSequence();
+    elPhasePack.classList.add('hidden');
+    elPhaseCards.classList.remove('hidden');
+    renderPulledCards([{ ...mythicCard, rarity: 'Mythic' }]);
 }
 
 function updateCoinsDisplay() {
