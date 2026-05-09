@@ -1,22 +1,19 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-import json
+from supabase import create_client, Client
 import os
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
-DB_FILE = 'users.json'
+# Supabase Configuration (Using Environment Variables for Security)
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
-def load_db():
-    if not os.path.exists(DB_FILE):
-        return {}
-    with open(DB_FILE, 'r') as f:
-        return json.load(f)
+if not SUPABASE_URL or not SUPABASE_KEY:
+    print("ERROR: Supabase credentials not found! Please set SUPABASE_URL and SUPABASE_KEY environment variables.")
 
-def save_db(db):
-    with open(DB_FILE, 'w') as f:
-        json.dump(db, f, indent=4)
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 @app.route('/')
 def index():
@@ -26,20 +23,13 @@ def index():
 @app.route('/assets/characters/<path:path>')
 @app.route('/<path:path>')
 def static_proxy(path):
-    # Check if the file exists at the exact path
     if os.path.exists(path) and not os.path.isdir(path):
         return send_from_directory('.', path)
-    
-    # Fallback: ignore folders and look for just the filename in the root
     filename = os.path.basename(path)
     if os.path.exists(filename) and not os.path.isdir(filename):
         return send_from_directory('.', filename)
-    
-    # If it looks like a file (has an extension) but wasn't found, return 404
     if '.' in path:
         return "File not found", 404
-        
-    # Otherwise, return index.html for SPA-style routing
     return send_from_directory('.', 'index.html')
 
 @app.route('/api/signup', methods=['POST'])
@@ -48,17 +38,18 @@ def signup():
     username = data.get('username')
     password = data.get('password')
     
-    db = load_db()
-    if username in db:
+    user_check = supabase.table("users").select("*").eq("username", username).execute()
+    if user_check.data:
         return jsonify({"success": False, "message": "User already exists"}), 400
     
-    db[username] = {
+    new_user = {
+        "username": username,
         "password": password,
         "inventory": [],
         "coins": 5000,
         "last_claim": 0
     }
-    save_db(db)
+    supabase.table("users").insert(new_user).execute()
     return jsonify({"success": True, "message": "Account created!"})
 
 @app.route('/api/login', methods=['POST'])
@@ -67,10 +58,12 @@ def login():
     username = data.get('username')
     password = data.get('password')
     
-    db = load_db()
-    user = db.get(username)
+    user_query = supabase.table("users").select("*").eq("username", username).execute()
+    if not user_query.data:
+        return jsonify({"success": False, "message": "Invalid credentials"}), 401
     
-    if user and user['password'] == password:
+    user = user_query.data[0]
+    if user['password'] == password:
         return jsonify({
             "success": True, 
             "username": username,
@@ -86,10 +79,9 @@ def login_auto():
     data = request.json
     username = data.get('username')
     
-    db = load_db()
-    user = db.get(username)
-    
-    if user:
+    user_query = supabase.table("users").select("*").eq("username", username).execute()
+    if user_query.data:
+        user = user_query.data[0]
         return jsonify({
             "success": True, 
             "username": username,
@@ -106,16 +98,17 @@ def save_data():
     username = data.get('username')
     inventory = data.get('inventory')
     coins = data.get('coins')
+    last_claim = data.get('last_claim')
     
-    db = load_db()
-    if username in db:
-        db[username]['inventory'] = inventory
-        db[username]['coins'] = coins
-        db[username]['last_claim'] = data.get('last_claim', db[username].get('last_claim', 0))
-        save_db(db)
-        return jsonify({"success": True})
-    
-    return jsonify({"success": False, "message": "User not found"}), 404
+    update_data = {
+        "inventory": inventory,
+        "coins": coins
+    }
+    if last_claim is not None:
+        update_data["last_claim"] = last_claim
+        
+    supabase.table("users").update(update_data).eq("username", username).execute()
+    return jsonify({"success": True})
 
 @app.route('/api/admin/users', methods=['POST'])
 def admin_users():
@@ -125,22 +118,18 @@ def admin_users():
     if admin_user != 'kierannb':
         return jsonify({"success": False, "message": "Unauthorized"}), 403
     
-    db = load_db()
+    users_query = supabase.table("users").select("*").execute()
     users_list = []
-    for username, data in db.items():
+    for user in users_query.data:
         users_list.append({
-            "username": username,
-            "coins": data.get('coins', 0),
-            "inventory_count": len(data.get('inventory', [])),
-            "last_claim": data.get('last_claim', 0)
+            "username": user['username'],
+            "coins": user.get('coins', 0),
+            "inventory_count": len(user.get('inventory', [])),
+            "last_claim": user.get('last_claim', 0)
         })
     
     return jsonify({"success": True, "users": users_list})
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    print("---------------------------------------")
-    print("TV COLLECTOR: VAULT SERVER RUNNING")
-    print(f"Port: {port}")
-    print("---------------------------------------")
     app.run(host='0.0.0.0', port=port)
