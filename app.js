@@ -399,6 +399,12 @@ function renderCollection() {
         if (filterRarity !== 'all' && rarity !== filterRarity) return;
         PLAYERS.forEach(player => {
             if (filterSeries !== 'all' && player.show !== filterSeries) return;
+            
+            // SECURITY CHECK: Only allow cards explicitly defined as Mythic to have the Mythic rarity
+            if (rarity === 'Mythic' && player.rarity !== 'Mythic') return;
+            // PREVENT REWARD CARDS FROM HAVING NON-MYTHIC RARITIES
+            if (rarity !== 'Mythic' && player.rarity === 'Mythic') return;
+
             const invKey = `${player.id}-${rarity}`;
             if (!inventoryCounts[invKey] || processedKeys.has(invKey)) return;
             processedKeys.add(invKey);
@@ -439,6 +445,12 @@ function renderCatalog() {
         if (filterRarity !== 'all' && rarity !== filterRarity) return;
         PLAYERS.forEach(player => {
             if (filterSeries !== 'all' && player.show !== filterSeries) return;
+
+            // SECURITY CHECK: Only allow cards explicitly defined as Mythic to have the Mythic rarity
+            if (rarity === 'Mythic' && player.rarity !== 'Mythic') return;
+            // PREVENT REWARD CARDS FROM HAVING NON-MYTHIC RARITIES
+            if (rarity !== 'Mythic' && player.rarity === 'Mythic') return;
+
             totalPossible++;
             const p = { ...player, rarity: rarity };
             const wrapper = document.createElement('div');

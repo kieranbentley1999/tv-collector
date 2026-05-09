@@ -24,18 +24,6 @@ const PLAYERS = [
     { "id": 23, "name": "Mike Ross", "show": "Suits", "role": "Patrick J. Adams", "img": "assets/characters/mike_ross.jpg" },
     { "id": 24, "name": "Jax Teller", "show": "Sons of Anarchy", "role": "Charlie Hunnam", "img": "assets/characters/jax_teller.jpg" },
     { "id": 25, "name": "Clay Morrow", "show": "Sons of Anarchy", "role": "Ron Perlman", "img": "assets/characters/clay_morrow.jpg" },
-    { "id": 26, "name": "Opie Winston", "show": "Sons of Anarchy", "role": "Ryan Hurst", "img": "assets/characters/jax_teller.jpg" },
-    { "id": 27, "name": "Gemma Teller", "show": "Sons of Anarchy", "role": "Katey Sagal", "img": "assets/characters/jax_teller.jpg" },
-    { "id": 28, "name": "Starlight", "show": "The Boys", "role": "Erin Moriarty", "img": "assets/characters/homelander.png" },
-    { "id": 29, "name": "A-Train", "show": "The Boys", "role": "Jessie T. Usher", "img": "assets/characters/homelander.png" },
-    { "id": 30, "name": "Shiv Roy", "show": "Succession", "role": "Sarah Snook", "img": "assets/characters/kendall_roy.png" },
-    { "id": 31, "name": "Roman Roy", "show": "Succession", "role": "Kieran Culkin", "img": "assets/characters/kendall_roy.png" },
-    { "id": 32, "name": "Michonne", "show": "The Walking Dead", "role": "Danai Gurira", "img": "assets/characters/rick_grimes.jpg" },
-    { "id": 33, "name": "Glenn Rhee", "show": "The Walking Dead", "role": "Steven Yeun", "img": "assets/characters/rick_grimes.jpg" },
-    { "id": 34, "name": "Rachel Zane", "show": "Suits", "role": "Meghan Markle", "img": "assets/characters/mike_ross.jpg" },
-    { "id": 35, "name": "Louis Litt", "show": "Suits", "role": "Rick Hoffman", "img": "assets/characters/mike_ross.jpg" },
-    { "id": 36, "name": "Richie Jerimovich", "show": "The Bear", "role": "Ebon Moss-Bachrach", "img": "assets/characters/carmy_berzatto.png" },
-    { "id": 37, "name": "Marcus Brooks", "show": "The Bear", "role": "Lionel Boyce", "img": "assets/characters/carmy_berzatto.png" },
     
     // MYTHIC CARDS (Not in packs)
     { "id": 101, "name": "Heisenberg", "show": "Breaking Bad", "role": "The Kingpin", "img": "assets/characters/mythic_heisenberg.png", "rarity": "Mythic" },
