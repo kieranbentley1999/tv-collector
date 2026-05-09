@@ -288,7 +288,7 @@ body {
 .modal {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    z-index: 1000;
+    z-index: 2000;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -968,6 +968,25 @@ select option {
 
     .card-role {
         font-size: 0.65rem;
+    }
+
+    /* Modal Fixes */
+    .modal-content {
+        align-items: center;
+        overflow-y: auto;
+        padding: 2rem 0;
+    }
+
+    .phase {
+        justify-content: flex-start; /* Start from top to ensure button is reachable */
+        height: auto;
+        min-height: 100%;
+    }
+
+    .action-btn {
+        margin-top: 2rem; /* Reduce margin on mobile */
+        width: 80%;
+        max-width: 300px;
     }
 }
 
