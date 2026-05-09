@@ -42,6 +42,7 @@
             <button id="nav-store" class="nav-btn active">Binge</button>
             <button id="nav-collection" class="nav-btn">Collection</button>
             <button id="nav-catalog" class="nav-btn">Catalog</button>
+            <button id="nav-admin" class="nav-btn admin-only hidden">Vault HQ</button>
         </nav>
             <div class="nav-right">
                 <button id="logout-btn" class="nav-btn logout-btn hidden">Logout</button>
@@ -131,6 +132,35 @@
                 <!-- All possible cards injected here -->
             </div>
         </section>
+
+        <!-- Admin View -->
+        <section id="view-admin" class="view hidden">
+            <div class="collection-header">
+                <h2>Vault Headquarters</h2>
+                <p>System overview of all registered collectors.</p>
+            </div>
+            <div class="admin-stats-grid">
+                <div class="admin-stat-card">
+                    <span class="admin-stat-label">Total Collectors</span>
+                    <span id="admin-total-users" class="admin-stat-value">0</span>
+                </div>
+            </div>
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Coins</th>
+                            <th>Cards</th>
+                            <th>Last Claim</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-user-list">
+                        <!-- Users will be listed here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </main>
 
     <!-- PACK OPENING MODAL -->
@@ -173,6 +203,10 @@
         <button id="mobile-nav-catalog" class="mobile-nav-btn">
             <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
             <span>Catalog</span>
+        </button>
+        <button id="mobile-nav-admin" class="mobile-nav-btn admin-only hidden">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span>HQ</span>
         </button>
     </nav>
 

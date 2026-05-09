@@ -67,6 +67,12 @@ const elMobileNavStore = document.getElementById('mobile-nav-store');
 const elMobileNavCollection = document.getElementById('mobile-nav-collection');
 const elMobileNavCatalog = document.getElementById('mobile-nav-catalog');
 
+const elNavAdmin = document.getElementById('nav-admin');
+const elMobileNavAdmin = document.getElementById('mobile-nav-admin');
+const elViewAdmin = document.getElementById('view-admin');
+const elAdminUserList = document.getElementById('admin-user-list');
+const elAdminTotalUsers = document.getElementById('admin-total-users');
+
 const elNotificationContainer = document.getElementById('notification-container');
 
 // Auth Elements
@@ -118,6 +124,9 @@ function init() {
     elMobileNavStore.addEventListener('click', () => switchView('store'));
     elMobileNavCollection.addEventListener('click', () => switchView('collection'));
     elMobileNavCatalog.addEventListener('click', () => switchView('catalog'));
+
+    elNavAdmin.addEventListener('click', () => switchView('admin'));
+    elMobileNavAdmin.addEventListener('click', () => switchView('admin'));
     
     // Sound Test
     document.getElementById('sound-test').addEventListener('click', () => {
@@ -157,6 +166,7 @@ async function autoLogin(username) {
             elAuthOverlay.classList.add('hidden');
             elLogoutBtn.classList.remove('hidden');
             updateCoinsDisplay();
+            checkAdminStatus();
             startRewardTimer();
             renderCollection();
             renderCatalog();
@@ -176,14 +186,17 @@ function switchView(view) {
     elViewStore.classList.remove('active');
     elViewCollection.classList.remove('active');
     elViewCatalog.classList.remove('active');
+    elViewAdmin.classList.remove('active');
     
     elNavStore.classList.remove('active');
     elNavCollection.classList.remove('active');
     elNavCatalog.classList.remove('active');
+    elNavAdmin.classList.remove('active');
 
     elMobileNavStore.classList.remove('active');
     elMobileNavCollection.classList.remove('active');
     elMobileNavCatalog.classList.remove('active');
+    elMobileNavAdmin.classList.remove('active');
     
     if (view === 'store') {
         elViewStore.classList.add('active');
@@ -202,6 +215,12 @@ function switchView(view) {
         elNavCatalog.classList.add('active');
         elMobileNavCatalog.classList.add('active');
         renderCatalog();
+    } else if (view === 'admin') {
+        elViewAdmin.classList.add('active');
+        elViewAdmin.classList.remove('hidden');
+        elNavAdmin.classList.add('active');
+        elMobileNavAdmin.classList.add('active');
+        fetchAdminData();
     }
 }
 
@@ -491,6 +510,7 @@ async function handleAuth(e) {
 
             elAuthOverlay.classList.add('hidden');
             updateCoinsDisplay();
+            checkAdminStatus();
             startRewardTimer();
             renderCollection();
             renderCatalog();
@@ -569,10 +589,60 @@ function handleLogout() {
     userCoins = 0;
     localStorage.removeItem('vault_user');
     elLogoutBtn.classList.add('hidden');
+    
+    // Hide admin tabs on logout
+    elNavAdmin.classList.add('hidden');
+    elMobileNavAdmin.classList.add('hidden');
+    
     elAuthOverlay.classList.remove('hidden');
     elAuthUser.value = '';
     elAuthPass.value = '';
     showNotification('Logged out successfully');
+}
+
+function checkAdminStatus() {
+    if (currentUser === 'kierannb') {
+        elNavAdmin.classList.remove('hidden');
+        elMobileNavAdmin.classList.remove('hidden');
+    } else {
+        elNavAdmin.classList.add('hidden');
+        elMobileNavAdmin.classList.add('hidden');
+    }
+}
+
+async function fetchAdminData() {
+    if (currentUser !== 'kierannb') return;
+    
+    try {
+        const response = await fetch(API_URL + '/admin/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ admin_username: currentUser })
+        });
+        const data = await response.json();
+        if (data.success) {
+            renderAdminUsers(data.users);
+        }
+    } catch (err) {
+        showNotification('Failed to fetch admin data', 'error');
+    }
+}
+
+function renderAdminUsers(users) {
+    elAdminUserList.innerHTML = '';
+    elAdminTotalUsers.textContent = users.length;
+    
+    users.forEach(user => {
+        const row = document.createElement('tr');
+        const lastClaimStr = user.last_claim ? new Date(user.last_claim).toLocaleString() : 'Never';
+        row.innerHTML = `
+            <td>${user.username} ${user.username === 'kierannb' ? '👑' : ''}</td>
+            <td>💰 ${user.coins.toLocaleString()}</td>
+            <td>🃏 ${user.inventory_count}</td>
+            <td>${lastClaimStr}</td>
+        `;
+        elAdminUserList.appendChild(row);
+    });
 }
 
 init();

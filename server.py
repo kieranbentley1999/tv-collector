@@ -117,6 +117,26 @@ def save_data():
     
     return jsonify({"success": False, "message": "User not found"}), 404
 
+@app.route('/api/admin/users', methods=['POST'])
+def admin_users():
+    data = request.json
+    admin_user = data.get('admin_username')
+    
+    if admin_user != 'kierannb':
+        return jsonify({"success": False, "message": "Unauthorized"}), 403
+    
+    db = load_db()
+    users_list = []
+    for username, data in db.items():
+        users_list.append({
+            "username": username,
+            "coins": data.get('coins', 0),
+            "inventory_count": len(data.get('inventory', [])),
+            "last_claim": data.get('last_claim', 0)
+        })
+    
+    return jsonify({"success": True, "users": users_list})
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     print("---------------------------------------")
