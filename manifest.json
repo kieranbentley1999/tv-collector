@@ -1,0 +1,16 @@
+{
+  "name": "TV Character Collector",
+  "short_name": "TV Collector",
+  "description": "Collect legendary TV characters in this cinematic card game.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0a0e17",
+  "theme_color": "#d4af37",
+  "icons": [
+    {
+      "src": "assets/tv_pack.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

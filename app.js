@@ -56,6 +56,10 @@ const elCatalogCount = document.getElementById('catalog-total-count');
 const elCatalogFilter = document.getElementById('catalog-rarity-filter');
 const elCatalogSeriesFilter = document.getElementById('catalog-series-filter');
 
+const elMobileNavStore = document.getElementById('mobile-nav-store');
+const elMobileNavCollection = document.getElementById('mobile-nav-collection');
+const elMobileNavCatalog = document.getElementById('mobile-nav-catalog');
+
 const elNotificationContainer = document.getElementById('notification-container');
 
 // Auth Elements
@@ -103,6 +107,10 @@ function init() {
     elNavStore.addEventListener('click', () => switchView('store'));
     elNavCollection.addEventListener('click', () => switchView('collection'));
     elNavCatalog.addEventListener('click', () => switchView('catalog'));
+
+    elMobileNavStore.addEventListener('click', () => switchView('store'));
+    elMobileNavCollection.addEventListener('click', () => switchView('collection'));
+    elMobileNavCatalog.addEventListener('click', () => switchView('catalog'));
     
     // Sound Test
     document.getElementById('sound-test').addEventListener('click', () => {
@@ -162,20 +170,27 @@ function switchView(view) {
     elNavStore.classList.remove('active');
     elNavCollection.classList.remove('active');
     elNavCatalog.classList.remove('active');
+
+    elMobileNavStore.classList.remove('active');
+    elMobileNavCollection.classList.remove('active');
+    elMobileNavCatalog.classList.remove('active');
     
     if (view === 'store') {
         elViewStore.classList.add('active');
         elViewStore.classList.remove('hidden');
         elNavStore.classList.add('active');
+        elMobileNavStore.classList.add('active');
     } else if (view === 'collection') {
         elViewCollection.classList.add('active');
         elViewCollection.classList.remove('hidden');
         elNavCollection.classList.add('active');
+        elMobileNavCollection.classList.add('active');
         renderCollection();
     } else if (view === 'catalog') {
         elViewCatalog.classList.add('active');
         elViewCatalog.classList.remove('hidden');
         elNavCatalog.classList.add('active');
+        elMobileNavCatalog.classList.add('active');
         renderCatalog();
     }
 }
