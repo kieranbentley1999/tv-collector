@@ -7,8 +7,8 @@ app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
 # Supabase Configuration (Using Environment Variables for Security)
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip()
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "").strip()
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     print("ERROR: Supabase credentials not found! Please set SUPABASE_URL and SUPABASE_KEY environment variables.")
