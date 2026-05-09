@@ -13,7 +13,8 @@ SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "").strip()
 if not SUPABASE_URL or not SUPABASE_KEY:
     print("ERROR: Supabase credentials not found! Please set SUPABASE_URL and SUPABASE_KEY environment variables.")
 else:
-    print(f"Connecting to Supabase project: {SUPABASE_URL}")
+    print(f"Connecting to Supabase project: {SUPABASE_URL[:20]}...")
+    print(f"Key starts with: {SUPABASE_KEY[:10]}...")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
