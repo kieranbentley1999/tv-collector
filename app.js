@@ -543,11 +543,11 @@ function renderSets() {
                 <div class="set-characters-preview">
                     ${charactersListHTML}
                 </div>
+                ${(isComplete && mythicCard && !alreadyHasMythic) ? 
+                    `<button class="claim-mythic-btn" onclick="claimMythic('${show}')">Claim Mythic!</button>` : 
+                    (alreadyHasMythic && mythicCard && isComplete ? `<div class="mythic-unlocked">💎 Mythic Unlocked</div>` : ``)
+                }
             </div>
-            ${(isComplete && mythicCard && !alreadyHasMythic) ? 
-                `<button class="claim-mythic-btn" onclick="claimMythic('${show}')">Claim Mythic Reward!</button>` : 
-                (alreadyHasMythic && mythicCard && isComplete ? `<div class="mythic-unlocked">💎 Mythic Unlocked</div>` : ``)
-            }
         `;
         elSetsGrid.appendChild(setCard);
     });

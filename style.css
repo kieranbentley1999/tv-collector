@@ -800,16 +800,17 @@ select option {
 }
 
 .claim-mythic-btn {
-    align-self: center;
+    margin-top: 1rem;
     background: linear-gradient(135deg, #7a00ff, #ff00c8);
     color: white;
     border: none;
-    padding: 0.8rem 1.2rem;
+    padding: 0.8rem;
     border-radius: 10px;
     font-weight: 800;
     cursor: pointer;
     animation: pulse-mythic 2s infinite;
-    white-space: nowrap;
+    width: 100%;
+    font-size: 0.9rem;
 }
 
 @keyframes pulse-mythic {
