@@ -24,6 +24,13 @@ const PLAYERS = [
     { "id": 23, "name": "Mike Ross", "show": "Suits", "role": "Patrick J. Adams", "img": "assets/characters/mike_ross.jpg" },
     { "id": 24, "name": "Jax Teller", "show": "Sons of Anarchy", "role": "Charlie Hunnam", "img": "assets/characters/jax_teller.jpg" },
     { "id": 25, "name": "Clay Morrow", "show": "Sons of Anarchy", "role": "Ron Perlman", "img": "assets/characters/clay_morrow.jpg" },
+    { "id": 26, "name": "Kim Wexler", "show": "Better Call Saul", "role": "Rhea Seehorn", "img": "assets/characters/kim_wexler.png" },
+    { "id": 27, "name": "Mike Ehrmantraut", "show": "Better Call Saul", "role": "Jonathan Banks", "img": "assets/characters/mike_ehrmantraut.png" },
+    { "id": 28, "name": "Richie Jerimovich", "show": "The Bear", "role": "Ebon Moss-Bachrach", "img": "assets/characters/richie_jerimovich.png" },
+    { "id": 29, "name": "Starlight", "show": "The Boys", "role": "Erin Moriarty", "img": "assets/characters/starlight.png" },
+    { "id": 30, "name": "A-Train", "show": "The Boys", "role": "Jessie T. Usher", "img": "assets/characters/a_train.png" },
+    { "id": 31, "name": "Roman Roy", "show": "Succession", "role": "Kieran Culkin", "img": "assets/characters/roman_roy.png" },
+    { "id": 32, "name": "Siobhan Roy", "show": "Succession", "role": "Sarah Snook", "img": "assets/characters/shiv_roy.png" },
     
     // MYTHIC CARDS (Not in packs)
     { "id": 101, "name": "Heisenberg", "show": "Breaking Bad", "role": "The Kingpin", "img": "assets/characters/mythic_heisenberg.png", "rarity": "Mythic" },

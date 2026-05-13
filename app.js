@@ -20,17 +20,28 @@ const DROP_RATES = {
 
 // Sound Effects
 const sfx = {
-    click: new Audio('assets/sfx/click.wav'),
-    whoosh: new Audio('assets/sfx/whoosh.wav'),
-    legendary: new Audio('assets/sfx/legendary.wav'),
-    reveal: new Audio('assets/sfx/reveal.wav')
+    click: new Audio('click.wav'),
+    whoosh: new Audio('whoosh.wav'),
+    legendary: new Audio('legendary.wav'),
+    reveal: new Audio('reveal.wav')
 };
 
 // Debug: Check if audio loads
 Object.values(sfx).forEach(audio => {
     audio.load();
-    audio.onerror = () => console.error('Audio failed to load:', audio.src);
+    audio.addEventListener('error', (e) => {
+        console.warn('Audio failed to load, disabling sound:', audio.src);
+        audio.isMuted = true;
+    });
 });
+
+// Helper for safe audio play
+function playSound(sound) {
+    if (sound && !sound.isMuted) {
+        sound.currentTime = 0;
+        sound.play().catch(err => console.warn('Playback blocked:', err));
+    }
+}
 
 // DOM Elements
 const elCoins = document.getElementById('coin-amount');
@@ -313,7 +324,7 @@ function startPackOpeningSequence() {
 
 function openPack() {
     elPackInteractive.classList.add('shake');
-    sfx.whoosh.play();
+    playSound(sfx.whoosh);
     setTimeout(() => {
         elPhasePack.classList.add('hidden');
         elPhaseCards.classList.remove('hidden');
@@ -324,6 +335,8 @@ function openPack() {
 
 function renderPulledCards(cards) {
     let flippedCount = 0;
+    const totalToFlip = cards.length;
+    
     cards.forEach((player, index) => {
         const cardHTML = generateCardElement(player, true);
         cardHTML.style.opacity = '0';
@@ -335,7 +348,7 @@ function renderPulledCards(cards) {
             cardHTML.style.opacity = '1';
             cardHTML.style.transform = 'translateY(0)';
             sfx.reveal.currentTime = 0;
-            sfx.reveal.play();
+            playSound(sfx.reveal);
             
             setTimeout(() => {
                 cardHTML.style.transform = '';
@@ -347,11 +360,19 @@ function renderPulledCards(cards) {
             if (!this.classList.contains('flipped')) {
                 this.classList.add('flipped');
                 flippedCount++;
-                if (player.rarity === 'Super Rare') {
-                    showNotification(`⭐ SUPER RARE PULL: ${player.name}! ⭐`, 'success');
-                    sfx.legendary.play();
+                
+                if (player.rarity === 'Super Rare' || player.rarity === 'Mythic') {
+                    showNotification(`${player.rarity === 'Mythic' ? '💎' : '⭐'} ${player.rarity.toUpperCase()} PULL: ${player.name}! ${player.rarity === 'Mythic' ? '💎' : '⭐'}`, 'success');
+                    playSound(sfx.legendary);
                 }
-                if (flippedCount === CARDS_PER_PACK) elFinishBtn.classList.remove('hidden');
+
+                // Show finish button when all cards are flipped
+                if (flippedCount >= totalToFlip) {
+                    setTimeout(() => {
+                        elFinishBtn.classList.remove('hidden');
+                        elFinishBtn.style.animation = 'pulse 1.5s infinite';
+                    }, 300);
+                }
             }
         });
     });
@@ -359,6 +380,7 @@ function renderPulledCards(cards) {
 
 function closePackModal() {
     elPackModal.classList.add('hidden');
+    elFinishBtn.style.animation = '';
 }
 
 function generateCardElement(player, faceDown = false) {
@@ -486,20 +508,41 @@ function renderSets() {
         
         if (showCards.length === 0) return; // Skip shows with no base cards
 
-        const ownedCount = showCards.filter(p => ownedIds.has(p.id)).length;
+        const ownedInShow = showCards.filter(p => ownedIds.has(p.id));
+        const ownedCount = ownedInShow.length;
         const percent = Math.floor((ownedCount / showCards.length) * 100);
         const isComplete = ownedCount === showCards.length;
         const alreadyHasMythic = mythicCard ? userInventory.includes(`${mythicCard.id}-Mythic`) : true;
 
         const setCard = document.createElement('div');
         setCard.className = `set-card ${isComplete ? 'complete' : ''}`;
+        
+        // Build characters list for the "Details" section
+        const charactersListHTML = showCards.map(p => `
+            <div class="set-character-mini ${ownedIds.has(p.id) ? 'owned' : 'missing'}">
+                <img src="${p.img}" onerror="this.style.opacity='0'">
+                <span>${p.name.split(' ')[0]}</span>
+            </div>
+        `).join('');
+
         setCard.innerHTML = `
+            <div class="set-reward-preview">
+                ${mythicCard ? `
+                    <div class="mythic-silhouette ${alreadyHasMythic ? 'unlocked' : ''}">
+                        <img src="${mythicCard.img}" class="mythic-img-preview" onerror="this.style.opacity='0'">
+                        ${!alreadyHasMythic ? '<div class="mythic-lock">🔒</div>' : ''}
+                    </div>
+                ` : ''}
+            </div>
             <div class="set-info">
                 <h3>${show}</h3>
                 <div class="set-progress-container">
                     <div class="set-progress-bar" style="width: ${percent}%"></div>
                 </div>
                 <div class="set-stats">${ownedCount} / ${showCards.length} Cards Collected</div>
+                <div class="set-characters-preview">
+                    ${charactersListHTML}
+                </div>
             </div>
             ${(isComplete && mythicCard && !alreadyHasMythic) ? 
                 `<button class="claim-mythic-btn" onclick="claimMythic('${show}')">Claim Mythic Reward!</button>` : 
@@ -523,7 +566,7 @@ async function claimMythic(showName) {
     
     // Epic Animation Effect
     showNotification(`💎 MYTHIC UNLOCKED: ${mythicCard.name}! 💎`, 'success');
-    sfx.legendary.play();
+    playSound(sfx.legendary);
     
     // Optional: Show the card in a modal for impact
     startPackOpeningSequence();
@@ -670,7 +713,7 @@ function claimReward() {
         syncData();
         startRewardTimer();
         showNotification(`💰 Claimed ${REWARD_AMOUNT.toLocaleString()} coins!`, 'success');
-        sfx.legendary.play();
+        playSound(sfx.legendary);
     }
 }
 

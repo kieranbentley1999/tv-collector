@@ -6,17 +6,98 @@ import os
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
+import json
+
 # Supabase Configuration (Using Environment Variables for Security)
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip()
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "").strip()
 
-if not SUPABASE_URL or not SUPABASE_KEY:
-    print("ERROR: Supabase credentials not found! Please set SUPABASE_URL and SUPABASE_KEY environment variables.")
-else:
-    print(f"Connecting to Supabase project: {SUPABASE_URL[:20]}...")
-    print(f"Key starts with: {SUPABASE_KEY[:10]}...")
+class LocalDatabase:
+    def __init__(self, filename='users.json'):
+        self.filename = filename
+        if not os.path.exists(self.filename):
+            with open(self.filename, 'w') as f:
+                json.dump({}, f)
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+    def _read(self):
+        try:
+            with open(self.filename, 'r') as f:
+                return json.load(f)
+        except:
+            return {}
+
+    def _write(self, data):
+        with open(self.filename, 'w') as f:
+            json.dump(data, f, indent=4)
+
+    def table(self, name):
+        return self
+
+    def select(self, *args):
+        return self
+
+    def eq(self, field, value):
+        self._filter_field = field
+        self._filter_value = value
+        return self
+
+    def insert(self, user_data):
+        data = self._read()
+        # Ensure we don't modify the original dict if possible
+        user_to_save = user_data.copy()
+        username = user_to_save.pop('username')
+        data[username] = user_to_save
+        self._write(data)
+        return self
+
+    def update(self, update_data):
+        self._update_data = update_data
+        return self
+
+    def execute(self):
+        data = self._read()
+        if hasattr(self, '_update_data'):
+            if hasattr(self, '_filter_field') and self._filter_field == 'username':
+                username = self._filter_value
+                if username in data:
+                    data[username].update(self._update_data)
+                    self._write(data)
+                delattr(self, '_filter_field')
+                delattr(self, '_filter_value')
+            delattr(self, '_update_data')
+            return type('obj', (object,), {'data': []})
+
+        if hasattr(self, '_filter_field'):
+            result = []
+            for username, user_data in data.items():
+                if self._filter_field == 'username' and username == self._filter_value:
+                    user_info = user_data.copy()
+                    user_info['username'] = username
+                    result.append(user_info)
+            delattr(self, '_filter_field')
+            delattr(self, '_filter_value')
+            return type('obj', (object,), {'data': result})
+        
+        # Admin select all
+        result = []
+        for username, user_data in data.items():
+            user_info = user_data.copy()
+            user_info['username'] = username
+            result.append(user_info)
+        return type('obj', (object,), {'data': result})
+
+# Database Selector
+if SUPABASE_URL and SUPABASE_KEY:
+    try:
+        supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+        print("Connected to Supabase")
+        db = supabase
+    except Exception as e:
+        print(f"Failed to connect to Supabase: {e}. Switching to Local Mode.")
+        db = LocalDatabase()
+else:
+    print("Supabase credentials not found. Switching to Local Mode.")
+    db = LocalDatabase()
 
 @app.route('/')
 def index():
@@ -41,7 +122,7 @@ def signup():
     username = data.get('username')
     password = data.get('password')
     
-    user_check = supabase.table("users").select("*").eq("username", username).execute()
+    user_check = db.table("users").select("*").eq("username", username).execute()
     if user_check.data:
         return jsonify({"success": False, "message": "User already exists"}), 400
     
@@ -52,7 +133,7 @@ def signup():
         "coins": 5000,
         "last_claim": 0
     }
-    supabase.table("users").insert(new_user).execute()
+    db.table("users").insert(new_user).execute()
     return jsonify({"success": True, "message": "Account created!"})
 
 @app.route('/api/login', methods=['POST'])
@@ -61,7 +142,7 @@ def login():
     username = data.get('username')
     password = data.get('password')
     
-    user_query = supabase.table("users").select("*").eq("username", username).execute()
+    user_query = db.table("users").select("*").eq("username", username).execute()
     if not user_query.data:
         return jsonify({"success": False, "message": "Invalid credentials"}), 401
     
@@ -82,7 +163,7 @@ def login_auto():
     data = request.json
     username = data.get('username')
     
-    user_query = supabase.table("users").select("*").eq("username", username).execute()
+    user_query = db.table("users").select("*").eq("username", username).execute()
     if user_query.data:
         user = user_query.data[0]
         return jsonify({
@@ -110,7 +191,7 @@ def save_data():
     if last_claim is not None:
         update_data["last_claim"] = last_claim
         
-    supabase.table("users").update(update_data).eq("username", username).execute()
+    db.table("users").update(update_data).eq("username", username).execute()
     return jsonify({"success": True})
 
 @app.route('/api/admin/users', methods=['POST'])
@@ -121,7 +202,7 @@ def admin_users():
     if admin_user != 'kierannb':
         return jsonify({"success": False, "message": "Unauthorized"}), 403
     
-    users_query = supabase.table("users").select("*").execute()
+    users_query = db.table("users").select("*").execute()
     users_list = []
     for user in users_query.data:
         users_list.append({
@@ -136,3 +217,4 @@ def admin_users():
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
+
